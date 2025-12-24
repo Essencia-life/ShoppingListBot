@@ -19,7 +19,6 @@
 	let touchTimeoutInstance: number | null;
 
 	function ontouchstart(event: TouchEvent) {
-		console.log(event);
 		if (event.touches.length === 1) {
 			activeTouch = event.touches.item(0);
 
@@ -41,7 +40,6 @@
 	}
 
 	function ontouchend(event: TouchEvent) {
-		console.log(event, longTouch);
 		if (event.touches.length === 0 && activeTouch) {
 			if (!longTouch) {
 				loading = true;

@@ -13,9 +13,13 @@ type MyContext = EmojiFlavor<Context>;
 
 export const bot = new Bot<MyContext>(BOT_TOKEN);
 
-const addItemRegEx = /((?<amount>[0-9]+|half a|a|one)?\s?(?<unit>x|k?g|m?l|bags?|crate|heads?|jars?|bottles?)?( of)? )?(?<label>.+)/i;
+const addItemRegEx =
+	/((?<amount>[0-9]+|half a|a|one)?\s?(?<unit>x|k?g|m?l|bags?|crate|heads?|jars?|bottles?)?( of)? )?(?<label>.+)/i;
 
-const inlineKeyboardOpenListButton = InlineKeyboard.url(`${emoji('clipboard')} Open Shopping List`, 'https://t.me/EssenciaShoppingBot?startapp=' + BOT_GROUP_ID);
+const inlineKeyboardOpenListButton = InlineKeyboard.url(
+	`${emoji('clipboard')} Open Shopping List`,
+	'https://t.me/EssenciaShoppingBot?startapp=' + BOT_GROUP_ID
+);
 const inlineKeyboard = new InlineKeyboard()
 	.row(InlineKeyboard.switchInlineCurrent(`${emoji('shopping_cart')} Add Item to List`))
 	.row(inlineKeyboardOpenListButton);
@@ -27,31 +31,20 @@ const inlineQueryResultsButton: InlineQueryResultsButton = {
 
 bot.use(emojiParser());
 
-bot.on('my_chat_member', async ctx => {
+bot.on('my_chat_member', async (ctx) => {
 	const { status } = ctx.myChatMember.new_chat_member;
 
-	if (status === 'member' && ctx.chatId === Number(BOT_GROUP_ID)) {
+	if (status === 'member' && ctx.chatId !== Number(BOT_GROUP_ID)) {
 		await bot.api.leaveChat(ctx.chatId);
 	}
 });
 
-bot.command('start', async ctx => {
+bot.command('start', async (ctx) => {
 	if (ctx.match === BOT_GROUP_ID) {
 		await ctx.api.sendMessage(ctx.chatId, 'Use the button below to open the shopping list.', {
-			reply_markup: new InlineKeyboard().add(inlineKeyboardOpenListButton),
+			reply_markup: new InlineKeyboard().add(inlineKeyboardOpenListButton)
 		});
 		await ctx.api.deleteMessage(ctx.chatId, ctx.message!.message_id);
-	}
-});
-
-bot.on('inline_query', async (ctx, next) => {
-	if (ctx.inlineQuery.query === '') {
-		await ctx.answerInlineQuery([], {
-			button: inlineQueryResultsButton,
-			cache_time: 24 * 60 * 60, // 1 day
-		});
-	} else {
-		next();
 	}
 });
 
@@ -64,15 +57,25 @@ bot.inlineQuery(addItemRegEx, async (ctx) => {
 			description: `Add ${itemText(item)} to ${category.label}`,
 			thumbnail_url: emojiImageUrl(category.emoji),
 			thumbnail_height: 96,
-			thumbnail_width: 96,
+			thumbnail_width: 96
 		}).text(`Added ${itemText(item)} to ${category.emoji} ${category.label}`)
 	);
 
 	if (results.length) {
-		await ctx.answerInlineQuery(results);
-	}
-	else {
+		const success = await ctx.answerInlineQuery(results);
+	} else {
 		await ctx.answerInlineQuery([], { button: inlineQueryResultsButton });
+	}
+});
+
+bot.on('inline_query', async (ctx, next) => {
+	if (ctx.inlineQuery.query === '') {
+		await ctx.answerInlineQuery([], {
+			button: inlineQueryResultsButton,
+			cache_time: 24 * 60 * 60 // 1 day
+		});
+	} else {
+		next();
 	}
 });
 
@@ -91,7 +94,7 @@ bot.on('chosen_inline_result', async (ctx) => {
 	const { message_id } = await bot.api.sendMessage(parseInt(BOT_GROUP_ID), shoppingList(list), {
 		message_thread_id: parseInt(BOT_MESSAGE_THREAD_ID),
 		parse_mode: 'HTML',
-		reply_markup: inlineKeyboard,
+		reply_markup: inlineKeyboard
 	});
 
 	const lastMessageId = await lastMessageIdService.getId();
@@ -112,11 +115,13 @@ export async function updateLastMessage(complete?: boolean, newList?: boolean) {
 			if (newList) {
 				const list = await listService.getCompletedList();
 				await bot.api.editMessageText(BOT_GROUP_ID, lastMessageId, shoppingList(list), {
-					parse_mode: 'HTML',
+					parse_mode: 'HTML'
 				});
 			} else {
 				await bot.api.editMessageReplyMarkup(BOT_GROUP_ID, lastMessageId, {
-					reply_markup: new InlineKeyboard().switchInlineCurrent(`${emoji('shopping_cart')} Add Item to new List`),
+					reply_markup: new InlineKeyboard().switchInlineCurrent(
+						`${emoji('shopping_cart')} Add Item to new List`
+					)
 				});
 			}
 
@@ -127,7 +132,7 @@ export async function updateLastMessage(complete?: boolean, newList?: boolean) {
 			// FIXME: causes 400: Bad Request: message is not modified - if checked more than one in short time
 			await bot.api.editMessageText(BOT_GROUP_ID, lastMessageId, shoppingList(list), {
 				parse_mode: 'HTML',
-				reply_markup: inlineKeyboard,
+				reply_markup: inlineKeyboard
 			});
 		}
 	} else {
@@ -142,7 +147,7 @@ export async function sendNewList() {
 	const { message_id } = await bot.api.sendMessage(parseInt(BOT_GROUP_ID), shoppingList(list), {
 		message_thread_id: parseInt(BOT_MESSAGE_THREAD_ID),
 		parse_mode: 'HTML',
-		reply_markup: inlineKeyboard,
+		reply_markup: inlineKeyboard
 	});
 
 	await lastMessageIdService.setId(message_id);
