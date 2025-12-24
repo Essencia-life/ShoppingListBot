@@ -130,6 +130,8 @@ export async function updateLastMessage(complete?: boolean, newList?: boolean) {
 				reply_markup: inlineKeyboard,
 			});
 		}
+	} else {
+		await sendNewList();
 	}
 }
 
