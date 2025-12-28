@@ -129,6 +129,11 @@ export async function updateLastMessage(complete?: boolean, newList?: boolean) {
 		} else {
 			const list = await listService.getList();
 
+			if (list.every((category) => !category.items.length)) {
+				await bot.api.deleteMessage(BOT_GROUP_ID, lastMessageId);
+				return;
+			}
+
 			// FIXME: causes 400: Bad Request: message is not modified - if checked more than one in short time
 			await bot.api.editMessageText(BOT_GROUP_ID, lastMessageId, shoppingList(list), {
 				parse_mode: 'HTML',
