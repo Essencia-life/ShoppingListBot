@@ -82,6 +82,8 @@
 		);
 
 		if (!deleteConfirmed) {
+			disabled = false;
+			loader.hide();
 			return;
 		}
 
