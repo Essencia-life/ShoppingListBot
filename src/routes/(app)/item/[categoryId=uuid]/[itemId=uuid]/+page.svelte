@@ -1,11 +1,11 @@
 <script lang="ts">
 	import { page } from '$app/state';
-	import { dialogOpen } from '$lib/actions/dialogOpen';
+	import { dialogOpen } from '$lib/attachments/dialogOpen';
 	import webAppDataService from '$lib/client/web-app-data.service';
 	import SwitchButton from '$lib/components/SwitchButton.svelte';
 	import type { UserAction } from '$lib/schema';
 	import WebApp from '@twa-dev/sdk';
-	import { deleteListItem, getList, updateListItem } from '../../../list.remote';
+	import { deleteListItem, getList, updateListItem } from '$lib/remote/list.remote';
 	import { getContext } from 'svelte';
 
 	let dialogRef: HTMLDialogElement;
@@ -96,7 +96,7 @@
 	}
 </script>
 
-<dialog bind:this={dialogRef} use:dialogOpen onclose={() => history.back()}>
+<dialog bind:this={dialogRef} {@attach dialogOpen} onclose={() => history.back()}>
 	<form>
 		<section>
 			<header>Update item</header>

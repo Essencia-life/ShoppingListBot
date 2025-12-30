@@ -3,7 +3,6 @@
 	import { onMount } from 'svelte';
 
 	onMount(() => {
-		preloadCode('/item/[categoryId]');
 		preloadCode('/settings');
 	});
 </script>

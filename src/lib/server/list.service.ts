@@ -55,6 +55,10 @@ class ListService {
         });
     }
 
+    async deleteCategory(categoryId: string) {
+        await redis.json.del(storageKey, `$.list[?(@.id == "${categoryId}")]`);
+    }
+
     async addItem(categoryId: string, item: Item): Promise<void> {
         console.log('addItem');
         await redis.json.arrappend(storageKey, `$.list[?(@.id == "${categoryId}")].items`, item);

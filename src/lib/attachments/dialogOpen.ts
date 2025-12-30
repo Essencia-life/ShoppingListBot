@@ -1,7 +1,6 @@
-import type { Action } from 'svelte/action';
+import type { Attachment } from 'svelte/attachments';
 
-// TODO: convert to attachment
-export const dialogOpen: Action<HTMLDialogElement> = (dialog) => {
+export const dialogOpen: Attachment<HTMLDialogElement> = (dialog) => {
 	dialog.showModal();
 
 	dialog.addEventListener('click', (event) => {

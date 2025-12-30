@@ -18,7 +18,7 @@
 		deleteCheckedListItems,
 		getList,
 		sendNewList
-	} from './list.remote';
+	} from '$lib/remote/list.remote';
 	import { fractionMapping } from '$lib/utils';
 	import Checkbox from '$lib/components/Checkbox.svelte';
 	import Plus from '@lucide/svelte/icons/plus';
@@ -133,7 +133,7 @@
 		navigator.vibrate(50);
 
 		goto(
-			resolve('/(app)/item/[categoryId]/[itemId=uuid]', {
+			resolve('/(app)/item/[categoryId=uuid]/[itemId=uuid]', {
 				categoryId: category.id,
 				itemId: item.id
 			})
@@ -151,7 +151,6 @@
 
 <header class="main">
 	<img class="avatar" src="/api/avatar" alt="Shopping List" />
-	<!-- <pre>{JSON.stringify(initData, null, 2)}</pre> -->
 </header>
 
 <main>
@@ -181,7 +180,10 @@
 					</li>
 				{/each}
 				<li>
-					<a class="link" href={resolve('/(app)/item/[categoryId]', { categoryId: category.id })}>
+					<a
+						class="link"
+						href={resolve('/(app)/item/[categoryId=uuid]', { categoryId: category.id })}
+					>
 						<Plus strokeWidth={1.5} />
 						Add Item
 					</a>

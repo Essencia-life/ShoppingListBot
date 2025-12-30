@@ -1,5 +1,5 @@
 import type { WebAppUser } from "telegram-web-app";
-import { verifyInitData } from "../../routes/(app)/init-data.remote";
+import { verifyInitData } from "$lib/remote/init-data.remote";
 import WebApp from "@twa-dev/sdk";
 
 let isValidPromise: Promise<void>;
