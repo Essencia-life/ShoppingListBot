@@ -131,6 +131,7 @@ export async function updateLastMessage(complete?: boolean, newList?: boolean) {
 
 			if (list.every((category) => !category.items.length)) {
 				await bot.api.deleteMessage(BOT_GROUP_ID, lastMessageId);
+				await lastMessageIdService.deleteId();
 				return;
 			}
 
