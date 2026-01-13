@@ -1,5 +1,12 @@
 import { BOT_GROUP_ID, BOT_MESSAGE_THREAD_ID, BOT_TOKEN } from '$env/static/private';
-import { Bot, Context, InlineKeyboard, InlineQueryResultBuilder } from 'grammy';
+import {
+	Bot,
+	Context,
+	GrammyError,
+	HttpError,
+	InlineKeyboard,
+	InlineQueryResultBuilder
+} from 'grammy';
 import { type EmojiFlavor, emojiParser, emoji } from '@grammyjs/emoji';
 
 import { itemText, shoppingList } from '$lib/server/utils/messageFormatter';
@@ -103,6 +110,43 @@ bot.on('chosen_inline_result', async (ctx) => {
 	}
 
 	await lastMessageIdService.setId(message_id);
+});
+
+bot.catch(async (err) => {
+	const ctx = err.ctx;
+	const e = err.error;
+
+	let message = `🚨 *Bot Error*\n`;
+
+	if (ctx) {
+		message += `\n• Update ID: \`${ctx.update.update_id}\``;
+		if (ctx.chat) message += `\n• Chat ID: \`${ctx.chat.id}\``;
+		if (ctx.from) message += `\n• User ID: \`${ctx.from.id}\``;
+	}
+
+	if (e instanceof GrammyError) {
+		message += `\n\n*GrammyError*\n\`${e.description}\``;
+	} else if (e instanceof HttpError) {
+		message += `\n\n*HttpError*\n\`${String(e.error)}\``;
+	} else {
+		message += `\n\n*Unknown Error*\n\`${String(e)}\``;
+	}
+
+	const stack =
+		e instanceof Error && e.stack
+			? e.stack.slice(0, 3500) // Telegram Limit-Schutz
+			: 'no stacktrace';
+
+	message += `\n\n*Stacktrace*\n\`\`\`\n${stack}\n\`\`\``;
+
+	try {
+		await bot.api.sendMessage(BOT_ADMIN_CHAT_ID, message, {
+			parse_mode: 'Markdown'
+			// disable_web_page_preview: true,
+		});
+	} catch (err) {
+		console.error(err);
+	}
 });
 
 export async function updateLastMessage(complete?: boolean, newList?: boolean) {
