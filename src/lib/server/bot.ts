@@ -106,7 +106,11 @@ bot.on('chosen_inline_result', async (ctx) => {
 
 	const lastMessageId = await lastMessageIdService.getId();
 	if (lastMessageId) {
-		await bot.api.deleteMessage(BOT_GROUP_ID, lastMessageId);
+		try {
+			await bot.api.deleteMessage(BOT_GROUP_ID, lastMessageId);
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	await lastMessageIdService.setId(message_id);
